@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use database::sea_orm::Database;
 use dotenv::dotenv;
+use std::collections::HashMap;
 use watcher::start_listening;
 
 #[tokio::main]

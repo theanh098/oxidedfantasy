@@ -1,7 +1,9 @@
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
+    Json,
 };
+use serde_json::json;
 
 pub enum AppError {
     ExpectedError(ApiError),
@@ -20,14 +22,17 @@ impl IntoResponse for AppError {
             )
                 .into_response(),
 
-            AppError::HttpSurfError(http_error) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!(
-                    "Error occured when sending http request, reason: {}",
-                    http_error.to_string()
-                ),
-            )
-                .into_response(),
+            AppError::HttpSurfError(http_error) => {
+                println!("http_error: {:#?}", http_error);
+
+                return  (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({
+                        "cause": "not",
+                        "message": format!("Error occured when sending http request, reason: {}",http_error.to_string())
+                    })),
+                ).into_response();
+            }
         }
     }
 }

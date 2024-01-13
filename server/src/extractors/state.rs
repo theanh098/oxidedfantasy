@@ -1,3 +1,4 @@
+use crate::error::AppError;
 use anyhow::Result;
 use axum::{
     async_trait,
@@ -6,8 +7,6 @@ use axum::{
 };
 use deadpool_redis::{Config, Runtime};
 use sea_orm::{Database, DatabaseConnection};
-
-use crate::error::AppError;
 
 pub type RedisConnection = deadpool_redis::Connection;
 

@@ -1,3 +1,4 @@
+use crate::error::ApiError;
 use axum::{
     async_trait,
     extract::{FromRequest, FromRequestParts, Query, Request},
@@ -6,8 +7,6 @@ use axum::{
 };
 use serde::de::DeserializeOwned;
 use validator::Validate;
-
-use crate::error::ApiError;
 
 pub struct ValidatedQuery<Q>(pub Q);
 pub struct ValidatedPayload<P>(pub P);
