@@ -29,10 +29,8 @@ pub struct Bootstrap {
 }
 
 pub async fn get_bootstrap() -> Result<Bootstrap, surf::Error> {
-    surf::get(format!(
-        "https://fantasy.premierleague.com/api/bootstrap-static/"
-    ))
-    .await?
-    .body_json::<Bootstrap>()
-    .await
+    surf::get("https://fantasy.premierleague.com/api/bootstrap-static/")
+        .await?
+        .body_json::<Bootstrap>()
+        .await
 }

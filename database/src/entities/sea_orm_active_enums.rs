@@ -14,14 +14,14 @@ pub enum ChipRule {
     NoChip,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "OffendedRule")]
-pub enum OffendedRule {
-    #[sea_orm(string_value = "MinWeekStart")]
-    MinWeekStart,
-    #[sea_orm(string_value = "Transferring")]
-    Transferring,
-    #[sea_orm(string_value = "UsingChip")]
-    UsingChip,
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "MatchStatus")]
+pub enum MatchStatus {
+    #[sea_orm(string_value = "Finished")]
+    Finished,
+    #[sea_orm(string_value = "Live")]
+    Live,
+    #[sea_orm(string_value = "Next")]
+    Next,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "TransferRule")]

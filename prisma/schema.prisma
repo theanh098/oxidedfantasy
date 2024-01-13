@@ -4,53 +4,37 @@ datasource db {
 }
 
 model User {
-  id                 Int          @id @default(autoincrement())
-  fpl_id             Int
-  active             Boolean      @default(false)
-  d_coin             Int          @default(0)
-  name               String?      @db.VarChar(34)
-  player_first_name  String?      @db.VarChar(34)
-  player_last_name   String?      @db.VarChar(34)
-  matches            Match[]      @relation("match_owner")
-  joined_matches     Match[]      @relation("match_opponent")
-  left_match_result  MatchResult? @relation("match_result_left_breaker")
-  right_match_result MatchResult? @relation("match_result_right_breaker")
+  id                Int     @id @default(autoincrement())
+  email             String  @unique @db.VarChar
+  fpl_id            Int
+  active            Boolean @default(false)
+  d_coin            Int     @default(0)
+  name              String? @db.VarChar(34)
+  player_first_name String? @db.VarChar(34)
+  player_last_name  String? @db.VarChar(34)
+  matches           Match[] @relation("match_owner")
+  joined_matches    Match[] @relation("match_opponent")
 
   @@map("user")
 }
 
 model Match {
   id            Int          @id @default(autoincrement())
-  created_date  DateTime     @default(now()) @db.Timestamp(6)
-  matched_at    DateTime?    @db.Timestamp(6)
+  season        String       @db.VarChar(16)
+  created_date  DateTime     @default(now()) @db.Timestamptz(3)
+  matched_at    DateTime?    @db.Timestamptz(3)
   game_week     Int
   bet_amount    Int
   transfer_rule TransferRule
   chip_rule     ChipRule
+  status        MatchStatus
   is_closed     Boolean      @default(false)
   owner_id      Int
   opponent_id   Int?
   owner         User         @relation("match_owner", fields: [owner_id], references: [id], onDelete: Cascade)
   opponent      User?        @relation("match_opponent", fields: [opponent_id], references: [id], onDelete: Cascade)
-  result        MatchResult?
 
   @@map("match")
-}
-
-model MatchResult {
-  id                  Int           @id @default(autoincrement())
-  match_id            Int           @unique
-  is_drawled_match    Boolean       @default(false)
-  left_breaker_id     Int?          @unique
-  right_breaker_id    Int?          @unique
-  metadata            String?       @db.VarChar
-  left_offended_rule  OffendedRule?
-  right_offended_rule OffendedRule?
-  match               Match         @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  left_breaker        User?         @relation("match_result_left_breaker", fields: [left_breaker_id], references: [id], onDelete: Cascade)
-  right_breaker       User?         @relation("match_result_right_breaker", fields: [right_breaker_id], references: [id], onDelete: Cascade)
-
-  @@map("match_result")
 }
 
 model EventStatus {
@@ -88,4 +72,10 @@ enum ChipRule {
   NoChip
   AnyChip
   All
+}
+
+enum MatchStatus {
+  Live
+  Finished
+  Next
 }

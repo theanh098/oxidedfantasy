@@ -1,1 +1,2 @@
-pub mod event_status;
+pub mod event_status_repository;
+pub mod user_repository;

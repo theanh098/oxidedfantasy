@@ -19,5 +19,4 @@ sea-gen = "rm -rf server/src/database/entities && sea generate entity -o databas
 
 [dependencies]
 server = { path = "./server" }
-database = { path = "./database" }
-services ={ path = "./services" }
+
