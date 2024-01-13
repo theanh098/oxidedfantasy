@@ -1,0 +1,91 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int          @id @default(autoincrement())
+  fpl_id             Int
+  active             Boolean      @default(false)
+  d_coin             Int          @default(0)
+  name               String?      @db.VarChar(34)
+  player_first_name  String?      @db.VarChar(34)
+  player_last_name   String?      @db.VarChar(34)
+  matches            Match[]      @relation("match_owner")
+  joined_matches     Match[]      @relation("match_opponent")
+  left_match_result  MatchResult? @relation("match_result_left_breaker")
+  right_match_result MatchResult? @relation("match_result_right_breaker")
+
+  @@map("user")
+}
+
+model Match {
+  id            Int          @id @default(autoincrement())
+  created_date  DateTime     @default(now()) @db.Timestamp(6)
+  matched_at    DateTime?    @db.Timestamp(6)
+  game_week     Int
+  bet_amount    Int
+  transfer_rule TransferRule
+  chip_rule     ChipRule
+  is_closed     Boolean      @default(false)
+  owner_id      Int
+  opponent_id   Int?
+  owner         User         @relation("match_owner", fields: [owner_id], references: [id], onDelete: Cascade)
+  opponent      User?        @relation("match_opponent", fields: [opponent_id], references: [id], onDelete: Cascade)
+  result        MatchResult?
+
+  @@map("match")
+}
+
+model MatchResult {
+  id                  Int           @id @default(autoincrement())
+  match_id            Int           @unique
+  is_drawled_match    Boolean       @default(false)
+  left_breaker_id     Int?          @unique
+  right_breaker_id    Int?          @unique
+  metadata            String?       @db.VarChar
+  left_offended_rule  OffendedRule?
+  right_offended_rule OffendedRule?
+  match               Match         @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  left_breaker        User?         @relation("match_result_left_breaker", fields: [left_breaker_id], references: [id], onDelete: Cascade)
+  right_breaker       User?         @relation("match_result_right_breaker", fields: [right_breaker_id], references: [id], onDelete: Cascade)
+
+  @@map("match_result")
+}
+
+model EventStatus {
+  gameweek              Int      @id
+  deadline_time         DateTime @db.Timestamptz(3)
+  finished              Boolean
+  data_checked          Boolean
+  average_entry_score   Int
+  highest_scoring_entry Int
+  deadline_time_epoch   Int
+  is_previous           Boolean
+  is_current            Boolean
+  is_next               Boolean
+  name                  String   @db.VarChar(26)
+
+  @@map("event_status")
+}
+
+enum OffendedRule {
+  Transferring
+  UsingChip
+  MinWeekStart
+}
+
+enum TransferRule {
+  Limit0
+  Limit1
+  Limit2
+  Limit3
+  Limit4
+  NoLimit
+}
+
+enum ChipRule {
+  NoChip
+  AnyChip
+  All
+}

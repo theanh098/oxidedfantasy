@@ -1,0 +1,4 @@
+[alias]
+start-server = "run --release"
+start-scheduler = "run --release --package scheduler"
+start-watcher = "run --release --package watcher"

@@ -1,0 +1,23 @@
+[package]
+name = "dfantasy"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+resolver = "2"
+
+members = [
+    "scheduler",
+    "server",
+    "watcher",
+    "database"
+, "services"]
+
+[package.metadata.commands]
+sea-gen = "rm -rf server/src/database/entities && sea generate entity -o database/entities --lib --with-serde both"
+
+[dependencies]
+server = { path = "./server" }
+database = { path = "./database" }
+services ={ path = "./services" }
