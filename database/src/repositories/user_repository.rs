@@ -24,6 +24,7 @@ pub async fn save<'r>(
     let new_user = user::ActiveModel {
         fpl_id: Set(data.fpl_id),
         email: Set(data.email.to_owned()),
+        google_id: Set(data.google_id),
         ..Default::default()
     };
 

@@ -15,7 +15,7 @@ members = [
 , "services"]
 
 [package.metadata.commands]
-sea-gen = "rm -rf server/src/database/entities && sea generate entity -o database/entities --lib --with-serde both"
+sea-gen = "rm -rf database/src/entities && sea generate entity -o database/src/entities --with-serde both"
 
 [dependencies]
 server = { path = "./server" }

@@ -11,17 +11,17 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
+    pub season: String,
     pub created_date: DateTimeWithTimeZone,
     pub matched_at: Option<DateTimeWithTimeZone>,
     pub game_week: i32,
     pub bet_amount: i32,
     pub transfer_rule: TransferRule,
     pub chip_rule: ChipRule,
+    pub status: MatchStatus,
     pub is_closed: bool,
     pub owner_id: i32,
     pub opponent_id: Option<i32>,
-    pub season: String,
-    pub status: MatchStatus,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

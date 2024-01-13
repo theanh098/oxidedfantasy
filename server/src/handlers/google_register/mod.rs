@@ -39,6 +39,7 @@ pub async fn handler(
         CreateUser {
             email: &oauth_response.email,
             fpl_id: payload.fpl_id,
+            google_id: Some(oauth_response.id),
         },
     )
     .await?;

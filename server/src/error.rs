@@ -18,21 +18,24 @@ impl IntoResponse for AppError {
 
             AppError::UnExpectedError(anyhow_error) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Error occured: {}", anyhow_error),
+                to_json(
+                    services::StatusCode::InternalServerError,
+                    format!("Error occured: {}", anyhow_error),
+                ),
             )
                 .into_response(),
 
-            AppError::HttpSurfError(http_error) => {
-                println!("http_error: {:#?}", http_error);
-
-                return  (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(json!({
-                        "cause": "not",
-                        "message": format!("Error occured when sending http request, reason: {}",http_error.to_string())
-                    })),
-                ).into_response();
-            }
+            AppError::HttpSurfError(http_error) => (
+                StatusCode::from_u16(http_error.status().into()).unwrap_or_default(),
+                to_json(
+                    http_error.status(),
+                    format!(
+                        "Error occured when sending http request, reason: {}",
+                        http_error.to_string()
+                    ),
+                ),
+            )
+                .into_response(),
         }
     }
 }
@@ -61,8 +64,16 @@ impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         use ApiError::*;
         match self {
-            AuthenticationError(reason) => (StatusCode::UNAUTHORIZED, reason).into_response(),
-            ClientError(reason) => (StatusCode::BAD_REQUEST, reason).into_response(),
+            AuthenticationError(reason) => (
+                StatusCode::UNAUTHORIZED,
+                to_json(services::StatusCode::Unauthorized, reason),
+            )
+                .into_response(),
+            ClientError(reason) => (
+                StatusCode::BAD_REQUEST,
+                to_json(services::StatusCode::BadRequest, reason),
+            )
+                .into_response(),
         }
     }
 }
@@ -75,4 +86,11 @@ impl FromSurfError for services::Error {
     fn into_app_error(self) -> AppError {
         AppError::HttpSurfError(self)
     }
+}
+
+fn to_json(code: services::StatusCode, message: String) -> Json<serde_json::Value> {
+    Json(json!({
+        "status_code": code,
+        "message": message
+    }))
 }

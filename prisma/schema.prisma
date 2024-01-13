@@ -9,6 +9,7 @@ model User {
   fpl_id            Int
   active            Boolean @default(false)
   d_coin            Int     @default(0)
+  google_id         String? @db.VarChar
   name              String? @db.VarChar(34)
   player_first_name String? @db.VarChar(34)
   player_last_name  String? @db.VarChar(34)

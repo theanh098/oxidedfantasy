@@ -1,3 +1,3 @@
 pub mod fantasy;
 pub mod google;
-pub use surf::Error;
+pub use surf::{Error, StatusCode};
