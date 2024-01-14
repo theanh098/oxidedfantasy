@@ -1,3 +1,4 @@
+use super::shared::generate_tokens;
 use crate::{
     error::{ApiError, AppError, FromSurfError},
     extractors::{
@@ -11,11 +12,9 @@ use chrono::Duration;
 use database::{models::create_user::CreateUser, repositories::user_repository};
 use services::google;
 
-use super::shared::generate_tokens;
-
 #[derive(serde::Deserialize)]
 pub struct Payload {
-    fpl_id: i32,
+    fpl_id: Option<i32>,
     access_token: String,
 }
 
@@ -28,7 +27,8 @@ pub async fn handler(
         .await
         .map_err(|err| err.into_app_error())?;
 
-    let existed_user = user_repository::find_first_by_email(&db, &oauth_response.email).await?;
+    let existed_user =
+        user_repository::find_first_by_platform_id(&db, Some(&oauth_response.id), None).await?;
 
     if existed_user.is_some() {
         return ApiError::ClientError("User already existed".to_string()).into();
