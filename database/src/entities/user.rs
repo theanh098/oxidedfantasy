@@ -16,6 +16,7 @@ pub struct Model {
     pub name: Option<String>,
     pub player_first_name: Option<String>,
     pub player_last_name: Option<String>,
+    pub facebook_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

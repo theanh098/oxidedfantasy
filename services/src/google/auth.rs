@@ -1,4 +1,4 @@
-use surf::StatusCode;
+use crate::handle_surf_response;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct GoogleAuthorizeResponse {
@@ -11,16 +11,5 @@ pub async fn authorize(access_token: &str) -> Result<GoogleAuthorizeResponse, su
         .header("Authorization", format!("Bearer {}", access_token))
         .await?;
 
-    let status = response.status();
-
-    if status != StatusCode::Ok {
-        let error_data = response
-            .body_string()
-            .await
-            .unwrap_or("Empty error response data".to_owned());
-
-        return Err(surf::Error::from_str(response.status(), error_data));
-    }
-
-    response.body_json::<GoogleAuthorizeResponse>().await
+    handle_surf_response(&mut response).await
 }

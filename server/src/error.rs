@@ -19,23 +19,28 @@ impl IntoResponse for AppError {
             AppError::UnExpectedError(anyhow_error) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 to_json(
-                    services::StatusCode::InternalServerError,
+                    StatusCode::INTERNAL_SERVER_ERROR,
                     format!("Error occured: {}", anyhow_error),
                 ),
             )
                 .into_response(),
 
-            AppError::HttpSurfError(http_error) => (
-                StatusCode::from_u16(http_error.status().into()).unwrap_or_default(),
-                to_json(
-                    http_error.status(),
-                    format!(
-                        "Error occured when sending http request, reason: {}",
-                        http_error.to_string()
+            AppError::HttpSurfError(http_error) => {
+                let status_code =
+                    StatusCode::from_u16(http_error.status().into()).unwrap_or_default();
+
+                return (
+                    status_code,
+                    to_json(
+                        status_code,
+                        format!(
+                            "Error occured when sending http request, reason: {}",
+                            http_error.to_string()
+                        ),
                     ),
-                ),
-            )
-                .into_response(),
+                )
+                    .into_response();
+            }
         }
     }
 }
@@ -66,12 +71,12 @@ impl IntoResponse for ApiError {
         match self {
             AuthenticationError(reason) => (
                 StatusCode::UNAUTHORIZED,
-                to_json(services::StatusCode::Unauthorized, reason),
+                to_json(StatusCode::UNAUTHORIZED, reason),
             )
                 .into_response(),
             ClientError(reason) => (
                 StatusCode::BAD_REQUEST,
-                to_json(services::StatusCode::BadRequest, reason),
+                to_json(StatusCode::BAD_REQUEST, reason),
             )
                 .into_response(),
         }
@@ -88,9 +93,10 @@ impl FromSurfError for services::Error {
     }
 }
 
-fn to_json(code: services::StatusCode, message: String) -> Json<serde_json::Value> {
+fn to_json(code: StatusCode, message: String) -> Json<serde_json::Value> {
     Json(json!({
-        "status_code": code,
-        "message": message
+        "code": code.as_u16(),
+        "message": message,
+        "status": code.as_str()
     }))
 }

@@ -1,3 +1,5 @@
+use crate::handle_surf_response;
+
 #[derive(serde::Deserialize)]
 pub struct Entry {
     pub id: i32,
@@ -24,10 +26,10 @@ pub struct Entry {
 }
 
 pub async fn get_entry(fpl_id: i32) -> Result<Entry, surf::Error> {
-    surf::get(format!(
+    let mut response = surf::get(format!(
         "https://fantasy.premierleague.com/api/entry/{fpl_id}"
     ))
-    .await?
-    .body_json::<Entry>()
-    .await
+    .await?;
+
+    handle_surf_response(&mut response).await
 }

@@ -1,3 +1,5 @@
+use crate::handle_surf_response;
+
 #[derive(serde::Deserialize, Debug)]
 pub struct Event {
     pub average_entry_score: i32,
@@ -29,8 +31,7 @@ pub struct Bootstrap {
 }
 
 pub async fn get_bootstrap() -> Result<Bootstrap, surf::Error> {
-    surf::get("https://fantasy.premierleague.com/api/bootstrap-static/")
-        .await?
-        .body_json::<Bootstrap>()
-        .await
+    let mut response = surf::get("https://fantasy.premierleague.com/api/bootstrap-static/").await?;
+
+    handle_surf_response(&mut response).await
 }

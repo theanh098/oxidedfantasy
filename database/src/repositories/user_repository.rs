@@ -25,6 +25,7 @@ pub async fn save<'r>(
         fpl_id: Set(data.fpl_id),
         email: Set(data.email.to_owned()),
         google_id: Set(data.google_id),
+        facebook_id: Set(data.facebook_id),
         ..Default::default()
     };
 

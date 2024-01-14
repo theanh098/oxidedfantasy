@@ -24,7 +24,7 @@ pub async fn handler(
     Redis(mut redis_conn): Redis,
     Json(payload): Json<Payload>,
 ) -> Result<Json<AuthenticateResponse>, AppError> {
-    let oauth_response = google::oauth2v3::authorize(&payload.access_token)
+    let oauth_response = google::authorize(&payload.access_token)
         .await
         .map_err(|err| err.into_app_error())?;
 
@@ -40,6 +40,7 @@ pub async fn handler(
             email: &oauth_response.email,
             fpl_id: payload.fpl_id,
             google_id: Some(oauth_response.id),
+            facebook_id: None,
         },
     )
     .await?;
