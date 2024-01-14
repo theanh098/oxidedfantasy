@@ -24,6 +24,16 @@ pub enum MatchStatus {
     Next,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "TransactionType")]
+pub enum TransactionType {
+    #[sea_orm(string_value = "Event")]
+    Event,
+    #[sea_orm(string_value = "Match")]
+    Match,
+    #[sea_orm(string_value = "Purchase")]
+    Purchase,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "TransferRule")]
 pub enum TransferRule {
     #[sea_orm(string_value = "Limit0")]

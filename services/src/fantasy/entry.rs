@@ -27,7 +27,8 @@ pub struct Entry {
 
 pub async fn get_entry(fpl_id: i32) -> Result<Entry, surf::Error> {
     let mut response = surf::get(format!(
-        "https://fantasy.premierleague.com/api/entry/{fpl_id}"
+        "https://fantasy.premierleague.com/api/entry/{}",
+        fpl_id
     ))
     .await?;
 

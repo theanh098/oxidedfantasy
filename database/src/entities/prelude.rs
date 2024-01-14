@@ -2,4 +2,5 @@
 
 pub use super::event_status::Entity as EventStatus;
 pub use super::r#match::Entity as Match;
+pub use super::transaction::Entity as Transaction;
 pub use super::user::Entity as User;

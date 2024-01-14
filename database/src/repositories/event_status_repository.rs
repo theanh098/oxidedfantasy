@@ -1,7 +1,8 @@
-use sea_orm::{sea_query::OnConflict, DatabaseConnection, EntityTrait, Set};
-use services::fantasy::bootstrap;
-
 use crate::entities::{event_status, prelude::EventStatus};
+use sea_orm::{
+    sea_query::OnConflict, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
+};
+use services::fantasy::bootstrap;
 
 pub async fn update_events(
     db: &DatabaseConnection,
@@ -47,4 +48,32 @@ pub async fn update_events(
         .exec(db)
         .await
         .map(|_| ())
+}
+
+pub async fn find_finished_previous_event(
+    db: &DatabaseConnection,
+) -> Result<Option<event_status::Model>, sea_orm::error::DbErr> {
+    EventStatus::find()
+        .filter(event_status::Column::IsPrevious.eq(true))
+        .filter(event_status::Column::Finished.eq(true))
+        .one(db)
+        .await
+}
+
+pub async fn find_next_event(
+    db: &DatabaseConnection,
+) -> Result<Option<event_status::Model>, sea_orm::error::DbErr> {
+    EventStatus::find()
+        .filter(event_status::Column::IsNext.eq(true))
+        .one(db)
+        .await
+}
+
+pub async fn find_current_event(
+    db: &DatabaseConnection,
+) -> Result<Option<event_status::Model>, sea_orm::error::DbErr> {
+    EventStatus::find()
+        .filter(event_status::Column::IsCurrent.eq(true))
+        .one(db)
+        .await
 }

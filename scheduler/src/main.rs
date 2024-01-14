@@ -1,4 +1,6 @@
 mod event_status_crawler;
+mod match_worker;
+
 use database::sea_orm::Database;
 use dotenv::dotenv;
 use scheduler::{CronExpression, Scheduler};
@@ -17,6 +19,16 @@ async fn main() {
         .add_job(CronExpression::EveryThreeMinutes, &|db| {
             Box::pin(async move {
                 event_status_crawler::update_event_status_every_3_mins(&db).await;
+            })
+        })
+        .add_job(CronExpression::EveryFiveMinutes, &|db| {
+            Box::pin(async move {
+                match_worker::update_matches_to_live(&db).await;
+            })
+        })
+        .add_job(CronExpression::EveryFiveMinutes, &|db| {
+            Box::pin(async move {
+                match_worker::update_matches_to_finished(&db).await;
             })
         })
         .start()

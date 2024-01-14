@@ -14,14 +14,20 @@ pub struct Model {
     pub season: String,
     pub created_date: DateTimeWithTimeZone,
     pub matched_at: Option<DateTimeWithTimeZone>,
-    pub game_week: i32,
     pub bet_amount: i32,
     pub transfer_rule: TransferRule,
     pub chip_rule: ChipRule,
     pub status: MatchStatus,
-    pub is_closed: bool,
     pub owner_id: i32,
     pub opponent_id: Option<i32>,
+    pub is_draw: bool,
+    pub is_matched: bool,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub metadata: Json,
+    pub opponent_point: i32,
+    pub owner_point: i32,
+    pub winner_id: Option<i32>,
+    pub gameweek: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -31,15 +37,23 @@ pub enum Relation {
         from = "Column::OpponentId",
         to = "super::user::Column::Id",
         on_update = "Cascade",
-        on_delete = "Cascade"
+        on_delete = "SetNull"
     )]
-    User2,
+    User3,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::OwnerId",
         to = "super::user::Column::Id",
         on_update = "Cascade",
-        on_delete = "Cascade"
+        on_delete = "Restrict"
+    )]
+    User2,
+    #[sea_orm(
+        belongs_to = "super::user::Entity",
+        from = "Column::WinnerId",
+        to = "super::user::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
     )]
     User1,
 }

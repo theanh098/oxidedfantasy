@@ -1,9 +1,8 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
-
 use crate::{
     entities::{prelude::User, user},
     models::create_user::CreateUser,
 };
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 
 pub async fn find_first_by_email(
     db: &DatabaseConnection,
