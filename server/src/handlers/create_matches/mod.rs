@@ -4,7 +4,7 @@ use crate::{
 };
 use database::{
     entities::{
-        r#match,
+        match_monitor, r#match,
         sea_orm_active_enums::{ChipRule, TransferRule},
     },
     repositories::{event_status_repository, match_repository, user_repository},

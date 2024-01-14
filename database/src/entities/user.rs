@@ -9,20 +9,44 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub email: String,
-    pub fpl_id: Option<i32>,
     pub active: bool,
     pub d_coin: i32,
+    pub fpl_id: Option<i32>,
     pub google_id: Option<String>,
+    pub facebook_id: Option<String>,
     pub name: Option<String>,
     pub player_first_name: Option<String>,
     pub player_last_name: Option<String>,
-    pub facebook_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(has_many = "super::r#match::Entity")]
+    Match,
+    #[sea_orm(has_many = "super::match_monitor::Entity")]
+    MatchMonitor,
+    #[sea_orm(has_many = "super::match_opponent::Entity")]
+    MatchOpponent,
     #[sea_orm(has_many = "super::transaction::Entity")]
     Transaction,
+}
+
+impl Related<super::r#match::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Match.def()
+    }
+}
+
+impl Related<super::match_monitor::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MatchMonitor.def()
+    }
+}
+
+impl Related<super::match_opponent::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MatchOpponent.def()
+    }
 }
 
 impl Related<super::transaction::Entity> for Entity {

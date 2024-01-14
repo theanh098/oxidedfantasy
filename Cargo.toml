@@ -11,8 +11,9 @@ members = [
     "scheduler",
     "server",
     "watcher",
-    "database"
-, "services"]
+    "database", 
+    "services"
+]
 
 [package.metadata.commands]
 sea-gen = "rm -rf database/src/entities && sea generate entity -o database/src/entities --with-serde both"

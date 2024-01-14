@@ -12,35 +12,36 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub season: String,
+    pub is_private: bool,
     pub created_date: DateTimeWithTimeZone,
-    pub matched_at: Option<DateTimeWithTimeZone>,
-    pub bet_amount: i32,
-    pub owner_id: i32,
-    pub opponent_id: Option<i32>,
-    pub is_draw: bool,
-    pub is_matched: bool,
-    #[sea_orm(column_type = "JsonBinary")]
-    pub metadata: Json,
-    pub opponent_point: i32,
-    pub owner_point: i32,
-    pub winner_id: Option<i32>,
+    pub status: MatchStatus,
     pub gameweek: i32,
+    pub bet_amount: i32,
     pub transfer_rule: TransferRule,
     pub chip_rule: ChipRule,
-    pub status: MatchStatus,
-    pub is_private: bool,
+    pub owner_id: i32,
+    pub match_opponent_id: Option<i32>,
+    pub match_monitor_id: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::OpponentId",
-        to = "super::user::Column::Id",
+        belongs_to = "super::match_monitor::Entity",
+        from = "Column::MatchMonitorId",
+        to = "super::match_monitor::Column::Id",
+        on_update = "Cascade",
+        on_delete = "Restrict"
+    )]
+    MatchMonitor,
+    #[sea_orm(
+        belongs_to = "super::match_opponent::Entity",
+        from = "Column::MatchOpponentId",
+        to = "super::match_opponent::Column::Id",
         on_update = "Cascade",
         on_delete = "SetNull"
     )]
-    User3,
+    MatchOpponent,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::OwnerId",
@@ -48,15 +49,25 @@ pub enum Relation {
         on_update = "Cascade",
         on_delete = "Restrict"
     )]
-    User2,
-    #[sea_orm(
-        belongs_to = "super::user::Entity",
-        from = "Column::WinnerId",
-        to = "super::user::Column::Id",
-        on_update = "Cascade",
-        on_delete = "SetNull"
-    )]
-    User1,
+    User,
+}
+
+impl Related<super::match_monitor::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MatchMonitor.def()
+    }
+}
+
+impl Related<super::match_opponent::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::MatchOpponent.def()
+    }
+}
+
+impl Related<super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::User.def()
+    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
