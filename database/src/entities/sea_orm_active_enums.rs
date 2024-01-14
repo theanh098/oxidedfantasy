@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "ChipRule")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "chip_rule")]
 pub enum ChipRule {
     #[sea_orm(string_value = "All")]
     All,
@@ -14,7 +14,7 @@ pub enum ChipRule {
     NoChip,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "MatchStatus")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "match_status")]
 pub enum MatchStatus {
     #[sea_orm(string_value = "Finished")]
     Finished,
@@ -24,7 +24,7 @@ pub enum MatchStatus {
     Next,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "TransactionType")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "transaction_type")]
 pub enum TransactionType {
     #[sea_orm(string_value = "Event")]
     Event,
@@ -34,7 +34,7 @@ pub enum TransactionType {
     Purchase,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "TransferRule")]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "transfer_rule")]
 pub enum TransferRule {
     #[sea_orm(string_value = "Limit0")]
     Limit0,

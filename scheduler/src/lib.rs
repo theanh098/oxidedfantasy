@@ -15,8 +15,8 @@ impl ToString for CronExpression {
     fn to_string(&self) -> String {
         use CronExpression::*;
         match self {
-            EveryFiveMinutes => "0 */5 * * * *".into(),
-            EveryThreeMinutes => "0 */3 * * * *".into(),
+            EveryFiveMinutes => "1/10 * * * * *".into(),
+            EveryThreeMinutes => "1/5 * * * * *".into(),
         }
     }
 }

@@ -15,9 +15,6 @@ pub struct Model {
     pub created_date: DateTimeWithTimeZone,
     pub matched_at: Option<DateTimeWithTimeZone>,
     pub bet_amount: i32,
-    pub transfer_rule: TransferRule,
-    pub chip_rule: ChipRule,
-    pub status: MatchStatus,
     pub owner_id: i32,
     pub opponent_id: Option<i32>,
     pub is_draw: bool,
@@ -28,6 +25,9 @@ pub struct Model {
     pub owner_point: i32,
     pub winner_id: Option<i32>,
     pub gameweek: i32,
+    pub transfer_rule: TransferRule,
+    pub chip_rule: ChipRule,
+    pub status: MatchStatus,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

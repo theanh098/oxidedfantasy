@@ -23,39 +23,39 @@ model User {
 }
 
 model Match {
-  id             Int          @id @default(autoincrement())
-  season         String       @db.VarChar(16)
-  created_date   DateTime     @default(now()) @db.Timestamptz(3)
-  is_matched     Boolean      @default(false)
-  matched_at     DateTime?    @db.Timestamptz(3)
+  id             Int           @id @default(autoincrement())
+  season         String        @db.VarChar(16)
+  created_date   DateTime      @default(now()) @db.Timestamptz(3)
+  is_matched     Boolean       @default(false)
+  matched_at     DateTime?     @db.Timestamptz(3)
   gameweek       Int
   bet_amount     Int
-  transfer_rule  TransferRule
-  chip_rule      ChipRule
-  status         MatchStatus
-  is_draw        Boolean      @default(false)
+  transfer_rule  transfer_rule
+  chip_rule      chip_rule
+  status         match_status
+  is_draw        Boolean       @default(false)
   owner_point    Int
   opponent_point Int
-  metadata       Json         @default("{}")
+  metadata       Json          @default("{}")
   owner_id       Int
   opponent_id    Int?
   winner_id      Int?
-  owner          User         @relation("match_owner", fields: [owner_id], references: [id])
-  opponent       User?        @relation("match_opponent", fields: [opponent_id], references: [id])
-  winner         User?        @relation("match_winner", fields: [winner_id], references: [id])
+  owner          User          @relation("match_owner", fields: [owner_id], references: [id])
+  opponent       User?         @relation("match_opponent", fields: [opponent_id], references: [id])
+  winner         User?         @relation("match_winner", fields: [winner_id], references: [id])
 
   @@map("match")
 }
 
 model Transaction {
-  id           Int             @id() @default(autoincrement())
-  created_date DateTime        @default(now()) @db.Timestamptz(3)
+  id           Int              @id() @default(autoincrement())
+  created_date DateTime         @default(now()) @db.Timestamptz(3)
   owner_id     Int
-  type         TransactionType
+  type         transaction_type
   d_coin       Int
-  message      String?         @db.VarChar()
-  metadata     Json            @default("{}")
-  owner        User            @relation(fields: [owner_id], references: [id])
+  message      String?          @db.VarChar()
+  metadata     Json             @default("{}")
+  owner        User             @relation(fields: [owner_id], references: [id])
 
   @@map("transaction")
 }
@@ -76,13 +76,13 @@ model EventStatus {
   @@map("event_status")
 }
 
-enum OffendedRule {
+enum offended_rule {
   Transferring
   UsingChip
   MinWeekStart
 }
 
-enum TransferRule {
+enum transfer_rule {
   Limit0
   Limit1
   Limit2
@@ -91,19 +91,19 @@ enum TransferRule {
   NoLimit
 }
 
-enum ChipRule {
+enum chip_rule {
   NoChip
   AnyChip
   All
 }
 
-enum MatchStatus {
+enum match_status {
   Live
   Finished
   Next
 }
 
-enum TransactionType {
+enum transaction_type {
   Match
   Purchase
   Event

@@ -11,11 +11,11 @@ pub struct Model {
     pub id: i32,
     pub created_date: DateTimeWithTimeZone,
     pub owner_id: i32,
-    pub r#type: TransactionType,
     pub d_coin: i32,
     pub message: Option<String>,
     #[sea_orm(column_type = "JsonBinary")]
     pub metadata: Json,
+    pub r#type: TransactionType,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
