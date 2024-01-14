@@ -1,16 +1,17 @@
 use crate::{
     entities::{
-        prelude::{Match, MatchMonitor, MatchOpponent, Transaction, User},
+        links,
+        prelude::{Match, Transaction},
         r#match,
         sea_orm_active_enums::{MatchStatus, TransactionFlag, TransactionType},
         transaction, user,
     },
-    models::{FindMatchesParams, MatchWithOwnerAndOpponentAndMonitor},
+    models::{FindMatchesParams, MatchWithOwnerAndOpponent},
 };
 use sea_orm::{
     sea_query::{Expr, Query},
     ColumnTrait, Condition, ConnectionTrait, DatabaseConnection, EntityTrait, LoaderTrait,
-    QueryFilter, QuerySelect, QueryTrait, Set, TransactionTrait,
+    QueryFilter, QuerySelect, QueryTrait, RelationTrait, Set, TransactionTrait,
 };
 
 pub async fn update_all_next_round_to_live_by_gameweek(
@@ -66,8 +67,6 @@ pub async fn create_matches(
         .exec_without_returning(db)
         .await?;
 
-    // create monitors
-
     // collect d_coin
     let mut query = Query::update();
     query
@@ -103,6 +102,11 @@ pub async fn create_matches(
     Ok(())
 }
 
+pub struct WhatHex {
+    id: i32,
+    gameweek: i32,
+}
+
 pub async fn find_matches(
     db: &DatabaseConnection,
     FindMatchesParams {
@@ -112,8 +116,11 @@ pub async fn find_matches(
         status,
         take,
     }: FindMatchesParams,
-) -> Result<Vec<MatchWithOwnerAndOpponentAndMonitor>, sea_orm::error::DbErr> {
+) -> Result<Vec<MatchWithOwnerAndOpponent>, sea_orm::error::DbErr> {
     let matches = Match::find()
+        .join(sea_orm::JoinType::LeftJoin, r#match::Relation::User1.def())
+        .join(sea_orm::JoinType::LeftJoin, r#match::Relation::User1.def())
+        .join(sea_orm::JoinType::LeftJoin, r#match::Relation::User1.def())
         .apply_if(created_by, |query, owner_id| {
             query.filter(r#match::Column::OwnerId.eq(owner_id))
         })
@@ -127,14 +134,9 @@ pub async fn find_matches(
         .filter(r#match::Column::Status.eq(status))
         .offset((page as u64 - 1) * take as u64)
         .limit(take as u64)
+        .into_model::<MatchWithOwnerAndOpponent>()
         .all(db)
         .await?;
-
-    let owners = matches.load_one(User, db).await?;
-    let monitors = matches.load_one(MatchMonitor, db).await?;
-    dbg!(&monitors);
-    let opponents = matches.load_one(MatchOpponent, db).await?;
-    dbg!(&opponents);
 
     let matches = matches
         .into_iter()
@@ -152,4 +154,28 @@ pub async fn find_matches(
         .collect();
 
     Ok(matches)
+}
+
+#[cfg(test)]
+mod test {
+
+    use sea_orm::QueryTrait;
+
+    use crate::entities::links;
+
+    use super::*;
+
+    #[test]
+    fn test() {
+        println!("hello kitty");
+
+        let sql = Match::find()
+            .find_also_linked(links::MatchToOwner)
+            .build(sea_orm::DatabaseBackend::Postgres)
+            .to_string();
+
+        println!("sql: {}", sql);
+
+        assert_eq!(sql, "");
+    }
 }

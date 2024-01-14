@@ -21,32 +21,8 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::r#match::Entity")]
-    Match,
-    #[sea_orm(has_many = "super::match_monitor::Entity")]
-    MatchMonitor,
-    #[sea_orm(has_many = "super::match_opponent::Entity")]
-    MatchOpponent,
     #[sea_orm(has_many = "super::transaction::Entity")]
     Transaction,
-}
-
-impl Related<super::r#match::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Match.def()
-    }
-}
-
-impl Related<super::match_monitor::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::MatchMonitor.def()
-    }
-}
-
-impl Related<super::match_opponent::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::MatchOpponent.def()
-    }
 }
 
 impl Related<super::transaction::Entity> for Entity {

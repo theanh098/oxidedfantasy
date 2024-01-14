@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
-sea-orm = { version = "0.12.10", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros", "with-chrono", "sea-orm-internal", "with-json" ] } 
+sea-orm = { version = "0.12.10", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros", "with-chrono", "sea-orm-internal", "with-json", "with-uuid" ] } 
 services = { path = "../services" }
 chrono = "0.4.31"

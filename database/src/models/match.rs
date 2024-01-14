@@ -1,15 +1,12 @@
-use crate::entities::{
-    match_monitor, match_opponent, r#match, sea_orm_active_enums::MatchStatus, user,
-};
+use crate::entities::{r#match, sea_orm_active_enums::MatchStatus, user};
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub struct MatchWithOwnerAndOpponentAndMonitor {
+pub struct MatchWithOwnerAndOpponent {
     #[serde(flatten)]
     pub r#match: r#match::Model,
     pub owner: Option<user::Model>,
-    pub opponent: Option<match_opponent::Model>,
-    pub monitor: Option<match_monitor::Model>,
+    pub opponent: Option<user::Model>,
 }
 
 #[derive(Default)]

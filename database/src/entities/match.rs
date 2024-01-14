@@ -20,28 +20,27 @@ pub struct Model {
     pub transfer_rule: TransferRule,
     pub chip_rule: ChipRule,
     pub owner_id: i32,
-    pub match_opponent_id: Option<i32>,
-    pub match_monitor_id: i32,
+    pub is_draw: bool,
+    pub is_matched: bool,
+    pub matched_at: Option<DateTimeWithTimeZone>,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub metadata: Json,
+    pub opponent_id: Option<i32>,
+    pub opponent_point: i32,
+    pub owner_point: i32,
+    pub winner_id: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::match_monitor::Entity",
-        from = "Column::MatchMonitorId",
-        to = "super::match_monitor::Column::Id",
-        on_update = "Cascade",
-        on_delete = "Restrict"
-    )]
-    MatchMonitor,
-    #[sea_orm(
-        belongs_to = "super::match_opponent::Entity",
-        from = "Column::MatchOpponentId",
-        to = "super::match_opponent::Column::Id",
+        belongs_to = "super::user::Entity",
+        from = "Column::OpponentId",
+        to = "super::user::Column::Id",
         on_update = "Cascade",
         on_delete = "SetNull"
     )]
-    MatchOpponent,
+    User3,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::OwnerId",
@@ -49,25 +48,15 @@ pub enum Relation {
         on_update = "Cascade",
         on_delete = "Restrict"
     )]
-    User,
-}
-
-impl Related<super::match_monitor::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::MatchMonitor.def()
-    }
-}
-
-impl Related<super::match_opponent::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::MatchOpponent.def()
-    }
-}
-
-impl Related<super::user::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::User.def()
-    }
+    User2,
+    #[sea_orm(
+        belongs_to = "super::user::Entity",
+        from = "Column::WinnerId",
+        to = "super::user::Column::Id",
+        on_update = "Cascade",
+        on_delete = "SetNull"
+    )]
+    User1,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
