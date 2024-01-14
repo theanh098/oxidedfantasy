@@ -24,12 +24,20 @@ pub enum MatchStatus {
     Next,
 }
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "transaction_flag")]
+pub enum TransactionFlag {
+    #[sea_orm(string_value = "Down")]
+    Down,
+    #[sea_orm(string_value = "Up")]
+    Up,
+}
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
 #[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "transaction_type")]
 pub enum TransactionType {
+    #[sea_orm(string_value = "CreateMatch")]
+    CreateMatch,
     #[sea_orm(string_value = "Event")]
     Event,
-    #[sea_orm(string_value = "Match")]
-    Match,
     #[sea_orm(string_value = "Purchase")]
     Purchase,
 }

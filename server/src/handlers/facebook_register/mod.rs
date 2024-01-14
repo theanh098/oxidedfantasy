@@ -8,7 +8,7 @@ use crate::{
 };
 use axum::Json;
 use chrono::Duration;
-use database::{models::create_user::CreateUser, repositories::user_repository};
+use database::{entities::user, repositories::user_repository, sea_orm::Set};
 use services::google;
 
 use super::shared::generate_tokens;
@@ -37,11 +37,11 @@ pub async fn handler(
 
     let new_user = user_repository::save(
         &db,
-        CreateUser {
-            email: &oauth_response.email,
-            fpl_id: payload.fpl_id,
-            facebook_id: Some(oauth_response.id),
-            google_id: None,
+        user::ActiveModel {
+            fpl_id: Set(payload.fpl_id),
+            email: Set(oauth_response.email.to_owned()),
+            facebook_id: Set(Some(oauth_response.id)),
+            ..Default::default()
         },
     )
     .await?;

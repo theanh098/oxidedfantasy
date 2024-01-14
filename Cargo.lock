@@ -856,6 +856,7 @@ dependencies = [
  "chrono",
  "sea-orm",
  "serde",
+ "serde_json",
  "services",
 ]
 
@@ -3048,7 +3049,6 @@ dependencies = [
  "deadpool-redis",
  "dotenv",
  "jsonwebtoken",
- "sea-orm",
  "serde",
  "serde_json",
  "services",

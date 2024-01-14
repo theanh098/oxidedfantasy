@@ -63,6 +63,7 @@ impl<A> From<ApiError> for Result<A, AppError> {
 pub enum ApiError {
     AuthenticationError(String),
     ClientError(String),
+    InternalError(String),
 }
 
 impl IntoResponse for ApiError {
@@ -74,9 +75,16 @@ impl IntoResponse for ApiError {
                 to_json(StatusCode::UNAUTHORIZED, reason),
             )
                 .into_response(),
+
             ClientError(reason) => (
                 StatusCode::BAD_REQUEST,
                 to_json(StatusCode::BAD_REQUEST, reason),
+            )
+                .into_response(),
+
+            InternalError(reason) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                to_json(StatusCode::INTERNAL_SERVER_ERROR, reason),
             )
                 .into_response(),
         }
@@ -97,6 +105,6 @@ fn to_json(code: StatusCode, message: String) -> Json<serde_json::Value> {
     Json(json!({
         "code": code.as_u16(),
         "message": message,
-        "status": code.as_str()
+        "status": code.to_string()
     }))
 }

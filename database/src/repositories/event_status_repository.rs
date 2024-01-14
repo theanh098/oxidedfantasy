@@ -45,7 +45,7 @@ pub async fn update_events(
                 ])
                 .to_owned(),
         )
-        .exec(db)
+        .exec_with_returning(db)
         .await
         .map(|_| ())
 }

@@ -1,34 +1,18 @@
-use crate::{
-    entities::{prelude::User, user},
-    models::create_user::CreateUser,
-};
+use crate::entities::{prelude::User, user};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryTrait, Set};
 
-pub async fn find_first_by_email(
+pub async fn find_by_id(
     db: &DatabaseConnection,
-    email: &str,
+    id: i32,
 ) -> Result<Option<user::Model>, sea_orm::error::DbErr> {
-    let user = User::find()
-        .filter(user::Column::Email.eq(email))
-        .one(db)
-        .await?;
-
-    Ok(user)
+    User::find().filter(user::Column::Id.eq(id)).one(db).await
 }
 
 pub async fn save<'r>(
     db: &DatabaseConnection,
-    data: CreateUser<'r>,
+    data: user::ActiveModel,
 ) -> Result<user::Model, sea_orm::error::DbErr> {
-    let new_user = user::ActiveModel {
-        fpl_id: Set(data.fpl_id),
-        email: Set(data.email.to_owned()),
-        google_id: Set(data.google_id),
-        facebook_id: Set(data.facebook_id),
-        ..Default::default()
-    };
-
-    let new_user = User::insert(new_user).exec_with_returning(db).await?;
+    let new_user = User::insert(data).exec_with_returning(db).await?;
 
     Ok(new_user)
 }

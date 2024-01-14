@@ -5,8 +5,8 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
 };
+use database::sea_orm::{Database, DatabaseConnection};
 use deadpool_redis::{Config, Runtime};
-use sea_orm::{Database, DatabaseConnection};
 
 pub type RedisConnection = deadpool_redis::Connection;
 

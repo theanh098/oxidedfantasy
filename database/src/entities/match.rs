@@ -28,6 +28,7 @@ pub struct Model {
     pub transfer_rule: TransferRule,
     pub chip_rule: ChipRule,
     pub status: MatchStatus,
+    pub is_private: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

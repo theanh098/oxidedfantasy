@@ -11,7 +11,6 @@ serde = { version = "1.0.195", features = ["derive"] }
 tokio = { version = "1.35.1", features = ["full"] }
 jsonwebtoken = "9.2.0"
 serde_json = "1.0.111"
-sea-orm = { version = "0.12.10", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros"] }
 chrono = "0.4.31"
 deadpool-redis = "0.14.0"
 dotenv = "0.15.0"
