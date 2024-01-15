@@ -4,66 +4,48 @@ datasource db {
 }
 
 model User {
-  id                Int             @id @default(autoincrement())
-  email             String          @db.VarChar
-  active            Boolean         @default(false)
-  d_coin            Int             @default(0)
+  id                Int           @id @default(autoincrement())
+  email             String        @db.VarChar
   fpl_id            Int?
-  google_id         String?         @unique @db.VarChar
-  facebook_id       String?         @unique @db.VarChar
-  name              String?         @db.VarChar(34)
-  player_first_name String?         @db.VarChar(34)
-  player_last_name  String?         @db.VarChar(34)
-  matches           Match[]
-  joined_matches    MatchOpponent[]
-  won_matches       MatchMonitor[]
+  active            Boolean       @default(false)
+  d_coin            Int           @default(0)
+  google_id         String?       @unique @db.VarChar
+  facebook_id       String?       @unique @db.VarChar
+  name              String?       @db.VarChar(34)
+  player_first_name String?       @db.VarChar(34)
+  player_last_name  String?       @db.VarChar(34)
+  matches           Match[]       @relation("match_owner")
+  joined_matches    Match[]       @relation("match_opponent")
+  win_on_matches    Match[]       @relation("match_winner")
   transactions      Transaction[]
 
   @@map("user")
 }
 
 model Match {
-  id                Int            @id @default(autoincrement())
-  season            String         @db.VarChar(16)
-  is_private        Boolean        @default(false)
-  created_date      DateTime       @default(now()) @db.Timestamptz(3)
-  status            match_status   @default(Next)
-  gameweek          Int
-  bet_amount        Int
-  transfer_rule     transfer_rule
-  chip_rule         chip_rule
-  owner_id          Int
-  match_opponent_id Int?           @unique
-  match_monitor_id  Int            @unique
-  owner             User           @relation(fields: [owner_id], references: [id])
-  match_opponent    MatchOpponent? @relation(fields: [match_opponent_id], references: [id])
-  monitor           MatchMonitor   @relation(fields: [match_monitor_id], references: [id])
+  id             Int           @id @default(autoincrement())
+  season         String        @db.VarChar(16)
+  is_private     Boolean       @default(false)
+  created_date   DateTime      @default(now()) @db.Timestamptz(3)
+  is_matched     Boolean       @default(false)
+  matched_at     DateTime?     @db.Timestamptz(3)
+  gameweek       Int
+  bet_amount     Int
+  transfer_rule  transfer_rule
+  chip_rule      chip_rule
+  status         match_status  @default(Next)
+  is_draw        Boolean       @default(false)
+  owner_point    Int           @default(0)
+  opponent_point Int           @default(0)
+  metadata       Json          @default("{}")
+  owner_id       Int
+  opponent_id    Int?
+  winner_id      Int?
+  owner          User          @relation("match_owner", fields: [owner_id], references: [id])
+  opponent       User?         @relation("match_opponent", fields: [opponent_id], references: [id])
+  winner         User?         @relation("match_winner", fields: [winner_id], references: [id])
 
   @@map("match")
-}
-
-model MatchOpponent {
-  id          Int    @id @default(autoincrement())
-  opponent_id Int
-  opponent    User   @relation(fields: [opponent_id], references: [id])
-  match       Match?
-
-  @@map("match_opponent")
-}
-
-model MatchMonitor {
-  id             Int       @id @default(autoincrement())
-  is_draw        Boolean   @default(false)
-  metadata       Json      @default("{}")
-  owner_point    Int       @default(0)
-  opponent_point Int       @default(0)
-  opponent_id    Int
-  matched_at     DateTime? @db.Timestamptz(3)
-  winner_id      Int?
-  winner         User?     @relation(fields: [winner_id], references: [id])
-  match          Match?
-
-  @@map("match_monitor")
 }
 
 model Transaction {

@@ -1,7 +1,7 @@
 use axum::Json;
 use database::{
     entities::sea_orm_active_enums::MatchStatus,
-    models::{FindMatchesParams, MatchWithOwnerAndOpponentAndMonitor},
+    models::{FindMatchesParams, MatchWithOwnerOpponentAndWinner},
     repositories::match_repository,
 };
 use serde::Deserialize;
@@ -10,7 +10,6 @@ use validator::Validate;
 use crate::{
     error::AppError,
     extractors::{security::Guard, state::Postgres, validator::ValidatedQuery},
-    responses::PaginationResponse,
 };
 
 #[derive(Deserialize)]
@@ -42,7 +41,7 @@ pub async fn handler(
         status,
         page,
     }): ValidatedQuery<QueryParams>,
-) -> Result<Json<PaginationResponse<MatchWithOwnerAndOpponentAndMonitor>>, AppError> {
+) -> Result<Json<Vec<MatchWithOwnerOpponentAndWinner>>, AppError> {
     let mut find_params = FindMatchesParams::default();
 
     find_params.page = page;
@@ -57,13 +56,15 @@ pub async fn handler(
         }
     };
 
-    let matches = match_repository::find_matches(&db, find_params).await?;
+    let _matches = match_repository::find_matches(&db, find_params).await?;
 
-    let response = PaginationResponse {
-        nodes: matches,
-        page,
-        total: 1000,
-    };
+    Ok(Json(_matches))
 
-    Ok(Json(response))
+    // let response = PaginationResponse {
+    //     nodes: matches,
+    //     page,
+    //     total: 1000,
+    // };
+
+    // Ok(Json(response))
 }

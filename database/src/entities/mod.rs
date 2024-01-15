@@ -3,7 +3,6 @@
 pub mod prelude;
 
 pub mod event_status;
-pub mod links;
 pub mod r#match;
 pub mod sea_orm_active_enums;
 pub mod transaction;
