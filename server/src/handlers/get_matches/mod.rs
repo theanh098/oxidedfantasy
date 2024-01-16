@@ -10,6 +10,7 @@ use validator::Validate;
 use crate::{
     error::AppError,
     extractors::{security::Guard, state::Postgres, validator::ValidatedQuery},
+    responses::PaginationResponse,
 };
 
 #[derive(Deserialize)]
@@ -41,7 +42,7 @@ pub async fn handler(
         status,
         page,
     }): ValidatedQuery<QueryParams>,
-) -> Result<Json<Vec<MatchWithOwnerOpponentAndWinner>>, AppError> {
+) -> Result<Json<PaginationResponse<MatchWithOwnerOpponentAndWinner>>, AppError> {
     let mut find_params = FindMatchesParams::default();
 
     find_params.page = page;
@@ -56,15 +57,11 @@ pub async fn handler(
         }
     };
 
-    let _matches = match_repository::find_matches(&db, find_params).await?;
+    let (matches, total) = match_repository::find_matches(&db, find_params).await?;
 
-    Ok(Json(_matches))
-
-    // let response = PaginationResponse {
-    //     nodes: matches,
-    //     page,
-    //     total: 1000,
-    // };
-
-    // Ok(Json(response))
+    Ok(Json(PaginationResponse {
+        nodes: matches,
+        page,
+        total,
+    }))
 }

@@ -10,8 +10,8 @@ use crate::{
 use sea_orm::{
     sea_query::{Alias, Expr, Query},
     ColumnTrait, Condition, ConnectionTrait, DatabaseConnection, EntityTrait, Iterable, Order,
-    QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait, SelectColumns, Set,
-    TransactionTrait,
+    PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait, SelectColumns,
+    Set, TransactionTrait,
 };
 
 pub async fn update_all_next_round_to_live_by_gameweek(
@@ -111,7 +111,7 @@ pub async fn find_matches(
         status,
         take,
     }: FindMatchesParams,
-) -> Result<Vec<MatchWithOwnerOpponentAndWinner>, sea_orm::error::DbErr> {
+) -> Result<(Vec<MatchWithOwnerOpponentAndWinner>, u64), sea_orm::error::DbErr> {
     let matches = Match::find()
         // Select partial match
         .select_only()
@@ -194,5 +194,19 @@ pub async fn find_matches(
         .all(db)
         .await?;
 
-    Ok(matches)
+    let total = Match::find()
+        .apply_if(created_by, |query, owner_id| {
+            query.filter(r#match::Column::OwnerId.eq(owner_id))
+        })
+        .apply_if(joined_by_or_created, |query, joined_by_or_created| {
+            query.filter(
+                Condition::any()
+                    .add(r#match::Column::OpponentId.eq(joined_by_or_created))
+                    .add(r#match::Column::OwnerId.eq(joined_by_or_created)),
+            )
+        })
+        .count(db)
+        .await?;
+
+    Ok((matches, total))
 }
