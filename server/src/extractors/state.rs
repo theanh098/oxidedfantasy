@@ -5,7 +5,7 @@ use axum::{
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
 };
-use database::sea_orm::{Database, DatabaseConnection};
+use database::sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use deadpool_redis::{Config, Runtime};
 
 pub type RedisConnection = deadpool_redis::Connection;
@@ -63,7 +63,10 @@ impl FromRef<AppState> for deadpool_redis::Pool {
 
 impl AppState {
     pub async fn new(db_url: &str) -> Result<Self> {
-        Database::connect(db_url)
+        let mut opt = ConnectOptions::new(db_url);
+        opt.sqlx_logging(false);
+
+        Database::connect(opt)
             .await
             .map_err(|e| e.into())
             .and_then(|pg_conn| {

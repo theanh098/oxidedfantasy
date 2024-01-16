@@ -92,9 +92,11 @@ impl FromQueryResult for MatchWithOwnerOpponentAndWinner {
 
 #[derive(Default)]
 pub struct FindMatchesParams {
-    pub take: u16,
-    pub page: u16,
+    pub take: u64,
+    pub page: u64,
     pub created_by: Option<i32>,
     pub joined_by_or_created: Option<i32>,
+    pub exclude_created_by: Option<i32>,
     pub status: MatchStatus,
+    pub season: Option<String>,
 }

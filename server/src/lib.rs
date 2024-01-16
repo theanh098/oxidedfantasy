@@ -12,9 +12,16 @@ use extractors::state::AppState;
 use handlers::{
     create_matches, facebook_register, get_matches, google_register, login, update_fpl_id,
 };
+use tracing_subscriber::filter::LevelFilter;
 
 #[tokio::main]
 pub async fn start() {
+    std::env::set_var("RUST_LOG", "debug");
+    tracing_subscriber::fmt()
+        .with_test_writer()
+        .with_max_level(LevelFilter::DEBUG)
+        .init();
+
     dotenv().ok();
     let db_url = std::env::var("DATABASE_URL").expect("db_url must be set");
 

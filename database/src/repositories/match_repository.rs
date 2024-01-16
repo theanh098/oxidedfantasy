@@ -110,9 +110,11 @@ pub async fn find_matches(
         page,
         status,
         take,
+        exclude_created_by,
+        season,
     }: FindMatchesParams,
 ) -> Result<(Vec<MatchWithOwnerOpponentAndWinner>, u64), sea_orm::error::DbErr> {
-    let matches = Match::find()
+    let query_builder = Match::find()
         // Select partial match
         .select_only()
         .columns(r#match::Column::iter().filter(|col| match col {
@@ -185,28 +187,25 @@ pub async fn find_matches(
                     .add(r#match::Column::OwnerId.eq(joined_by_or_created)),
             )
         })
-        .filter(r#match::Column::Status.eq(status))
-        .offset((page as u64 - 1) * take as u64)
-        .limit(take as u64)
+        .apply_if(exclude_created_by, |query, exclude_created_by| {
+            query.filter(r#match::Column::OwnerId.ne(exclude_created_by))
+        })
+        .apply_if(season.clone(), |query, season| {
+            query.filter(r#match::Column::Season.eq(season))
+        })
+        .filter(r#match::Column::Status.eq(status));
+
+    let matches = query_builder
+        .to_owned()
+        .offset((page - 1) * take)
+        .limit(take)
         .order_by(r#match::Column::Id, Order::Asc)
-        // If there are any modifier on this query, QueryResult implementation for MatchWithOwnerOpponentAndWinner should be modified too at models/match.rs database crate
+        // If there are any modifier on this query, the QueryResult implementation for MatchWithOwnerOpponentAndWinner should be modified too.
         .into_model::<MatchWithOwnerOpponentAndWinner>()
         .all(db)
         .await?;
 
-    let total = Match::find()
-        .apply_if(created_by, |query, owner_id| {
-            query.filter(r#match::Column::OwnerId.eq(owner_id))
-        })
-        .apply_if(joined_by_or_created, |query, joined_by_or_created| {
-            query.filter(
-                Condition::any()
-                    .add(r#match::Column::OpponentId.eq(joined_by_or_created))
-                    .add(r#match::Column::OwnerId.eq(joined_by_or_created)),
-            )
-        })
-        .count(db)
-        .await?;
+    let total = query_builder.count(db).await?;
 
     Ok((matches, total))
 }
