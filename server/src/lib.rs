@@ -10,7 +10,8 @@ use axum::{
 use dotenv::dotenv;
 use extractors::state::AppState;
 use handlers::{
-    create_matches, facebook_register, get_matches, google_register, login, update_fpl_id,
+    create_matches, facebook_register, get_matches, google_register, join_match, login,
+    update_fpl_id,
 };
 use tracing_subscriber::filter::LevelFilter;
 
@@ -32,6 +33,7 @@ pub async fn start() {
         .route("/users/update-fpl-id", post(update_fpl_id::handler))
         .route("/users/matches", post(create_matches::handler))
         .route("/users/matches", get(get_matches::handler))
+        .route("/users/matches/joining", post(join_match::handler))
         .with_state(AppState::new(&db_url).await.unwrap());
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

@@ -1,11 +1,11 @@
-use crate::error::ExtractError;
 use axum::{
     async_trait,
     extract::{
         rejection::{FormRejection, JsonRejection, QueryRejection},
         FromRequest, FromRequestParts, Query, Request,
     },
-    http::request::Parts,
+    http::{request::Parts, StatusCode},
+    response::{IntoResponse, Response},
     Form, Json,
 };
 use serde::de::DeserializeOwned;
@@ -60,5 +60,39 @@ where
         let Form(value) = Form::<T>::from_request(req, state).await?;
         value.validate()?;
         Ok(ValidatedForm(value))
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ExtractError {
+    #[error(transparent)]
+    ValidationError(#[from] validator::ValidationErrors),
+
+    #[error(transparent)]
+    AxumFormRejection(#[from] FormRejection),
+
+    #[error(transparent)]
+    AxumQueryRejection(#[from] QueryRejection),
+
+    #[error(transparent)]
+    AxumPayloadRejection(#[from] JsonRejection),
+}
+
+impl IntoResponse for ExtractError {
+    fn into_response(self) -> Response {
+        match self {
+            ExtractError::ValidationError(_) => {
+                let message = format!("Input validation error: [{self}]").replace('\n', ", ");
+                (
+                    StatusCode::BAD_REQUEST,
+                    crate::error::to_json(StatusCode::BAD_REQUEST, message),
+                )
+            }
+            _ => (
+                StatusCode::BAD_REQUEST,
+                crate::error::to_json(StatusCode::BAD_REQUEST, self.to_string()),
+            ),
+        }
+        .into_response()
     }
 }

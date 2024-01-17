@@ -1,5 +1,4 @@
 use axum::{
-    extract::rejection::{FormRejection, JsonRejection, QueryRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
@@ -9,16 +8,13 @@ use serde_json::json;
 pub enum AppError {
     Rejection(RejectedApi),
     Execution(anyhow::Error),
-    HttpSurf(services::Error),
-    Extractor(ExtractError),
+    SurfRequest(services::Error),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         match self {
             AppError::Rejection(api_error) => api_error.into_response(),
-
-            AppError::Extractor(extract_error) => extract_error.into_response(),
 
             AppError::Execution(anyhow_error) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -29,7 +25,7 @@ impl IntoResponse for AppError {
             )
                 .into_response(),
 
-            AppError::HttpSurf(http_error) => {
+            AppError::SurfRequest(http_error) => {
                 let status_code =
                     StatusCode::from_u16(http_error.status().into()).unwrap_or_default();
 
@@ -95,51 +91,17 @@ impl IntoResponse for RejectedApi {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum ExtractError {
-    #[error(transparent)]
-    ValidationError(#[from] validator::ValidationErrors),
-
-    #[error(transparent)]
-    AxumFormRejection(#[from] FormRejection),
-
-    #[error(transparent)]
-    AxumQueryRejection(#[from] QueryRejection),
-
-    #[error(transparent)]
-    AxumPayloadRejection(#[from] JsonRejection),
-}
-
-impl IntoResponse for ExtractError {
-    fn into_response(self) -> Response {
-        match self {
-            ExtractError::ValidationError(_) => {
-                let message = format!("Input validation error: [{self}]").replace('\n', ", ");
-                (
-                    StatusCode::BAD_REQUEST,
-                    to_json(StatusCode::BAD_REQUEST, message),
-                )
-            }
-            _ => (
-                StatusCode::BAD_REQUEST,
-                to_json(StatusCode::BAD_REQUEST, self.to_string()),
-            ),
-        }
-        .into_response()
-    }
-}
-
 pub trait FromSurfError {
     fn into_app_error(self) -> AppError;
 }
 
 impl FromSurfError for services::Error {
     fn into_app_error(self) -> AppError {
-        AppError::HttpSurf(self)
+        AppError::SurfRequest(self)
     }
 }
 
-fn to_json(code: StatusCode, message: String) -> Json<serde_json::Value> {
+pub fn to_json(code: StatusCode, message: String) -> Json<serde_json::Value> {
     Json(json!({
         "code": code.as_u16(),
         "message": message,

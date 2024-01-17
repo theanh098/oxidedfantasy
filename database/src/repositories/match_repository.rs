@@ -200,3 +200,28 @@ pub async fn find_matches(
 
     Ok((matches, total))
 }
+
+pub async fn find_by_id(
+    db: &DatabaseConnection,
+    id: i32,
+) -> Result<Option<r#match::Model>, sea_orm::error::DbErr> {
+    Match::find()
+        .filter(r#match::Column::Id.eq(id))
+        .one(db)
+        .await
+}
+
+pub async fn update_when_user_join_match(
+    db: &DatabaseConnection,
+    match_id: i32,
+    user_id: i32,
+) -> Result<(), sea_orm::error::DbErr> {
+    Match::update(r#match::ActiveModel {
+        opponent_id: Set(Some(user_id)),
+        ..Default::default()
+    })
+    .filter(r#match::Column::Id.eq(match_id))
+    .exec(db)
+    .await
+    .map(|_| ())
+}
