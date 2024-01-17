@@ -27,9 +27,9 @@ where
             let call_back = workers.get(chanel).unwrap();
 
             let payload_string = notification.payload().to_owned();
-            let payload = serde_json::from_str::<P>(&payload_string).unwrap();
+            let payload = serde_json::from_str::<P>(&payload_string)?;
 
-            call_back(payload, db).await.unwrap();
+            call_back(payload, db).await?;
         }
     }
 }

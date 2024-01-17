@@ -21,7 +21,11 @@ async fn main() -> anyhow::Result<()> {
         },
     );
 
-    start_listening(pool, &db, workers).await.unwrap();
+    start_listening(pool, &db, workers)
+        .await
+        .unwrap_or_else(|err| {
+            eprintln!("An error occured from watcher: {}", err);
+        });
 
     Ok(())
 }

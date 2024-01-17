@@ -22,10 +22,10 @@ struct PartialMatch {
     gameweek: i32,
     status: MatchStatus,
 }
+
 #[derive(Serialize)]
 struct PlayerOnMatch {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    id: Option<i32>,
+    id: i32,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     fpl_id: Option<i32>,
