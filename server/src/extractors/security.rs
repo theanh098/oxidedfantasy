@@ -1,4 +1,4 @@
-use crate::error::ApiError;
+use crate::error::RejectedApi;
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
 use axum_extra::{
     headers::{authorization::Bearer, Authorization},
@@ -29,7 +29,7 @@ impl<S> FromRequestParts<S> for Guard
 where
     S: Send + Sync,
 {
-    type Rejection = ApiError;
+    type Rejection = RejectedApi;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         let access_secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
@@ -37,7 +37,7 @@ where
         let bearer = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
-            .map_err(|_| ApiError::AuthenticationError("Missing Authorization".into()))?;
+            .map_err(|_| RejectedApi::AuthenticationError("Missing Authorization".into()))?;
 
         jsonwebtoken::decode::<Claims>(
             bearer.token(),
@@ -45,8 +45,8 @@ where
             &Validation::default(),
         )
         .map_err(|err| match err.kind() {
-            ErrorKind::ExpiredSignature => ApiError::AuthenticationError("Expired token".into()),
-            _ => ApiError::AuthenticationError("Invalid token".into()),
+            ErrorKind::ExpiredSignature => RejectedApi::AuthenticationError("Expired token".into()),
+            _ => RejectedApi::AuthenticationError("Invalid token".into()),
         })
         .map(|token_data| Self(token_data.claims))
     }

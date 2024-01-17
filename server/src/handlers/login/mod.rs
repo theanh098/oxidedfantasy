@@ -1,5 +1,5 @@
 use crate::{
-    error::{ApiError, AppError, FromSurfError},
+    error::{AppError, FromSurfError, RejectedApi},
     extractors::{
         security::{Claims, SubClaims},
         state::{Postgres, Redis},
@@ -46,7 +46,7 @@ pub async fn handler(
     let user = user_repository::find_first_by_platform_id(&db, google_id, facebook_id).await?;
 
     let Some(user) = user else {
-        return ApiError::AuthenticationError("user not found".to_owned()).into();
+        return RejectedApi::AuthenticationError("user not found".to_owned()).into();
     };
 
     let claims = Claims::new(&user, Duration::days(7));

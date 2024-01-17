@@ -1,5 +1,8 @@
-use crate::entities::{prelude::User, user};
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryTrait, Set};
+use crate::entities::{prelude::User, sea_orm_active_enums::TransactionFlag, user};
+use sea_orm::{
+    sea_query::{Expr, Query},
+    ColumnTrait, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryTrait, Set,
+};
 
 pub async fn find_by_id(
     db: &DatabaseConnection,
@@ -48,4 +51,28 @@ pub async fn update_fpl_id(
     .exec(db)
     .await
     .map(|_| ())
+}
+
+pub async fn update_d_coin(
+    db: &DatabaseConnection,
+    user_id: i32,
+    d_coin: i32,
+    kind: TransactionFlag,
+) -> Result<(), sea_orm::error::DbErr> {
+    let mut query = Query::update();
+
+    query
+        .table(user::Entity)
+        .value(
+            user::Column::DCoin,
+            match kind {
+                TransactionFlag::Down => Expr::col(user::Column::DCoin).sub(d_coin),
+                TransactionFlag::Up => Expr::col(user::Column::DCoin).add(d_coin),
+            },
+        )
+        .and_where(user::Column::Id.eq(user_id));
+
+    db.execute(db.get_database_backend().build(&query)).await?;
+
+    Ok(())
 }

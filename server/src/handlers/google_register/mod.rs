@@ -1,6 +1,6 @@
 use super::shared::generate_tokens;
 use crate::{
-    error::{ApiError, AppError, FromSurfError},
+    error::{AppError, FromSurfError, RejectedApi},
     extractors::{
         security::{Claims, SubClaims},
         state::{Postgres, Redis},
@@ -31,7 +31,7 @@ pub async fn handler(
         user_repository::find_first_by_platform_id(&db, Some(&oauth_response.id), None).await?;
 
     if existed_user.is_some() {
-        return ApiError::ClientError("User already existed".to_string()).into();
+        return RejectedApi::ClientError("User already existed".to_string()).into();
     }
 
     let new_user = user_repository::save(

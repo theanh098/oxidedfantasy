@@ -3094,6 +3094,7 @@ dependencies = [
  "serde",
  "serde_json",
  "services",
+ "thiserror",
  "tokio 1.35.1",
  "tracing-subscriber",
  "uuid",

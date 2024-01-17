@@ -1,36 +1,33 @@
-use crate::error::ApiError;
+use crate::error::ExtractError;
 use axum::{
     async_trait,
-    extract::{FromRequest, FromRequestParts, Query, Request},
+    extract::{
+        rejection::{FormRejection, JsonRejection, QueryRejection},
+        FromRequest, FromRequestParts, Query, Request,
+    },
     http::request::Parts,
-    Json,
+    Form, Json,
 };
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
 pub struct ValidatedQuery<Q>(pub Q);
 pub struct ValidatedPayload<P>(pub P);
+pub struct ValidatedForm<F>(pub F);
 
 #[async_trait]
 impl<S, Q> FromRequestParts<S> for ValidatedQuery<Q>
 where
     S: Send + Sync,
     Q: Validate,
-    Query<Q>: FromRequestParts<S>,
+    Query<Q>: FromRequestParts<S, Rejection = QueryRejection>,
 {
-    type Rejection = ApiError;
+    type Rejection = ExtractError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let query = Query::<Q>::from_request_parts(parts, state).await;
-
-        if let Ok(Query(data)) = query {
-            match data.validate() {
-                Ok(_) => Ok(ValidatedQuery(data)),
-                Err(err) => Err(ApiError::ClientError(err.to_string())),
-            }
-        } else {
-            Err(ApiError::ClientError("Invalid query string".into()))
-        }
+        let Query(query) = Query::<Q>::from_request_parts(parts, state).await?;
+        query.validate()?;
+        Ok(ValidatedQuery(query))
     }
 }
 
@@ -39,20 +36,29 @@ impl<S, P> FromRequest<S> for ValidatedPayload<P>
 where
     S: Send + Sync,
     P: Validate + DeserializeOwned,
-    Json<P>: FromRequest<S>,
+    Json<P>: FromRequest<S, Rejection = JsonRejection>,
 {
-    type Rejection = ApiError;
+    type Rejection = ExtractError;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        let json = Json::<P>::from_request(req, state).await;
+        let Json(payload) = Json::<P>::from_request(req, state).await?;
+        payload.validate()?;
+        Ok(ValidatedPayload(payload))
+    }
+}
 
-        if let Ok(Json(json_body)) = json {
-            match json_body.validate() {
-                Ok(_) => Ok(ValidatedPayload(json_body)),
-                Err(err) => Err(ApiError::ClientError(err.to_string())),
-            }
-        } else {
-            Err(ApiError::ClientError("Invalid json body".into()))
-        }
+#[async_trait]
+impl<T, S> FromRequest<S> for ValidatedForm<T>
+where
+    T: DeserializeOwned + Validate,
+    S: Send + Sync,
+    Form<T>: FromRequest<S, Rejection = FormRejection>,
+{
+    type Rejection = ExtractError;
+
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let Form(value) = Form::<T>::from_request(req, state).await?;
+        value.validate()?;
+        Ok(ValidatedForm(value))
     }
 }

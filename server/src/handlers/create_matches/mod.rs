@@ -1,5 +1,5 @@
 use crate::{
-    error::{ApiError, AppError},
+    error::{AppError, RejectedApi},
     extractors::{security::Guard, state::Postgres, validator::ValidatedPayload},
 };
 use database::{
@@ -39,7 +39,7 @@ pub async fn handler(
     let next_event = event_status_repository::find_next_event(&db).await?;
 
     let Some(next_event) = next_event else {
-        return ApiError::InternalError("not found next gameweek".to_owned()).into();
+        return RejectedApi::InternalError("not found next gameweek".to_owned()).into();
     };
 
     let total_d_coin = payload.quantity as i32 * payload.bet;
@@ -48,11 +48,11 @@ pub async fn handler(
         let user = user_repository::find_by_id(&db, claims.id).await?;
 
         let Some(user) = user else {
-            return ApiError::AuthenticationError("not found user".to_owned()).into();
+            return RejectedApi::AuthenticationError("not found user".to_owned()).into();
         };
 
         if user.d_coin < total_d_coin {
-            return ApiError::ClientError("not d_coin enough".to_owned()).into();
+            return RejectedApi::ClientError("not d_coin enough".to_owned()).into();
         }
     }
 

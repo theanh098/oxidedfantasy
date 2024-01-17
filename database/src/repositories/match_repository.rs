@@ -3,15 +3,16 @@ use crate::{
         prelude::{Match, Transaction},
         r#match,
         sea_orm_active_enums::{MatchStatus, TransactionFlag, TransactionType},
-        transaction, user,
+        transaction,
     },
     models::{FindMatchesParams, MatchWithOwnerOpponentAndWinner},
+    repositories::user_repository::update_d_coin,
 };
 use sea_orm::{
-    sea_query::{Alias, Expr, Query},
-    ColumnTrait, Condition, ConnectionTrait, DatabaseConnection, EntityTrait, Iterable, Order,
-    PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait, SelectColumns,
-    Set, TransactionTrait,
+    sea_query::{Alias, Expr},
+    ColumnTrait, Condition, DatabaseConnection, EntityTrait, Iterable, Order, PaginatorTrait,
+    QueryFilter, QueryOrder, QuerySelect, QueryTrait, RelationTrait, SelectColumns, Set,
+    TransactionTrait,
 };
 
 pub async fn update_all_next_round_to_live_by_gameweek(
@@ -68,17 +69,7 @@ pub async fn create_matches(
         .await?;
 
     // collect d_coin
-    let mut query = Query::update();
-    query
-        .table(user::Entity)
-        .value(
-            user::Column::DCoin,
-            Expr::col(user::Column::DCoin).sub(total_d_coin),
-        )
-        .and_where(Expr::col(user::Column::Id).eq(creator_id));
-
-    let stmt = db.get_database_backend().build(&query);
-    db.execute(stmt).await?;
+    update_d_coin(db, creator_id, total_d_coin, TransactionFlag::Down).await?;
 
     // create transactions
     let metadata = serde_json::json!({
