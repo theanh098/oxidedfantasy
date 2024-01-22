@@ -91,11 +91,11 @@ impl IntoResponse for RejectedApi {
     }
 }
 
-pub trait FromSurfError {
+pub trait IntoAppError {
     fn into_app_error(self) -> AppError;
 }
 
-impl FromSurfError for services::Error {
+impl IntoAppError for services::Error {
     fn into_app_error(self) -> AppError {
         AppError::SurfRequest(self)
     }

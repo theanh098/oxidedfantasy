@@ -1,6 +1,6 @@
 use super::shared::generate_tokens;
 use crate::{
-    error::{AppError, FromSurfError, RejectedApi},
+    error::{AppError, IntoAppError, RejectedApi},
     extractors::{
         security::{Claims, SubClaims},
         state::{Postgres, Redis},
